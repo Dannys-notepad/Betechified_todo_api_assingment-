@@ -1,13 +1,52 @@
 const express = require("express");
+const fs = require("fs");
+const path = require("path");
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
 app.use(express.json());
 
-// In-memory store (resets when the server restarts)
+const DATA_FILE = path.join(__dirname, "todos.json");
+
+// Load todos from file or initialize
 let todos = [];
 let nextId = 1;
+
+function loadTodos() {
+  try {
+    if (fs.existsSync(DATA_FILE)) {
+      const data = fs.readFileSync(DATA_FILE, "utf8");
+      todos = JSON.parse(data);
+      if (!Array.isArray(todos)) {
+        todos = [];
+      }
+      if (todos.length > 0) {
+        nextId = Math.max(...todos.map((t) => t.id || 0)) + 1;
+      } else {
+        nextId = 1;
+      }
+    } else {
+      todos = [];
+      nextId = 1;
+    }
+  } catch (error) {
+    console.error("Error reading or parsing todos file, starting fresh:", error);
+    todos = [];
+    nextId = 1;
+  }
+}
+
+function saveTodos() {
+  try {
+    fs.writeFileSync(DATA_FILE, JSON.stringify(todos, null, 2), "utf8");
+  } catch (error) {
+    console.error("Error saving todos to file:", error);
+  }
+}
+
+// Initial load
+loadTodos();
 
 // GET all todos (optional filter: /todos?completed=true)
 app.get("/todos", (req, res) => {
@@ -39,6 +78,7 @@ app.post("/todos", (req, res) => {
     createdAt: new Date().toISOString(),
   };
   todos.push(todo);
+  saveTodos();
   res.status(201).json(todo);
 });
 
@@ -60,6 +100,7 @@ app.put("/todos/:id", (req, res) => {
     }
     todo.completed = completed;
   }
+  saveTodos();
   res.json(todo);
 });
 
@@ -68,6 +109,7 @@ app.delete("/todos/:id", (req, res) => {
   const index = todos.findIndex((t) => t.id === Number(req.params.id));
   if (index === -1) return res.status(404).json({ error: "Todo not found" });
   const [deleted] = todos.splice(index, 1);
+  saveTodos();
   res.json(deleted);
 });
 
