@@ -10,39 +10,61 @@ app.use(express.json());
 const DATA_FILE = path.join(__dirname, "todos.json");
 
 // Load todos from file or initialize
-let todos = [];
+const todosMap = new Map();
 let nextId = 1;
 
 function loadTodos() {
   try {
     if (fs.existsSync(DATA_FILE)) {
       const data = fs.readFileSync(DATA_FILE, "utf8");
-      todos = JSON.parse(data);
-      if (!Array.isArray(todos)) {
-        todos = [];
+      const parsed = JSON.parse(data);
+      todosMap.clear();
+      if (Array.isArray(parsed)) {
+        for (const todo of parsed) {
+          if (todo && typeof todo.id === "number") {
+            todosMap.set(todo.id, todo);
+          }
+        }
       }
-      if (todos.length > 0) {
-        nextId = Math.max(...todos.map((t) => t.id || 0)) + 1;
+      if (todosMap.size > 0) {
+        nextId = Math.max(...Array.from(todosMap.keys())) + 1;
       } else {
         nextId = 1;
       }
     } else {
-      todos = [];
+      todosMap.clear();
       nextId = 1;
     }
   } catch (error) {
     console.error("Error reading or parsing todos file, starting fresh:", error);
-    todos = [];
+    todosMap.clear();
     nextId = 1;
   }
 }
 
+// Serialized, non-blocking asynchronous save
+let isWriting = false;
+let pendingWrite = false;
+
 function saveTodos() {
-  try {
-    fs.writeFileSync(DATA_FILE, JSON.stringify(todos, null, 2), "utf8");
-  } catch (error) {
-    console.error("Error saving todos to file:", error);
+  if (isWriting) {
+    pendingWrite = true;
+    return;
   }
+
+  isWriting = true;
+  pendingWrite = false;
+
+  const data = JSON.stringify(Array.from(todosMap.values()));
+  fs.writeFile(DATA_FILE, data, "utf8", (error) => {
+    isWriting = false;
+    if (error) {
+      console.error("Error saving todos to file:", error);
+    }
+    if (pendingWrite) {
+      saveTodos();
+    }
+  });
 }
 
 // Initial load
@@ -50,17 +72,17 @@ loadTodos();
 
 // GET all todos (optional filter: /todos?completed=true)
 app.get("/todos", (req, res) => {
-  let result = todos;
+  const list = Array.from(todosMap.values());
   if (req.query.completed !== undefined) {
     const completed = req.query.completed === "true";
-    result = todos.filter((t) => t.completed === completed);
+    return res.json(list.filter((t) => t.completed === completed));
   }
-  res.json(result);
+  res.json(list);
 });
 
 // GET one todo
 app.get("/todos/:id", (req, res) => {
-  const todo = todos.find((t) => t.id === Number(req.params.id));
+  const todo = todosMap.get(Number(req.params.id));
   if (!todo) return res.status(404).json({ error: "Todo not found" });
   res.json(todo);
 });
@@ -77,14 +99,14 @@ app.post("/todos", (req, res) => {
     completed: false,
     createdAt: new Date().toISOString(),
   };
-  todos.push(todo);
+  todosMap.set(todo.id, todo);
   saveTodos();
   res.status(201).json(todo);
 });
 
 // PUT update a todo
 app.put("/todos/:id", (req, res) => {
-  const todo = todos.find((t) => t.id === Number(req.params.id));
+  const todo = todosMap.get(Number(req.params.id));
   if (!todo) return res.status(404).json({ error: "Todo not found" });
 
   const { title, completed } = req.body;
@@ -106,11 +128,12 @@ app.put("/todos/:id", (req, res) => {
 
 // DELETE a todo
 app.delete("/todos/:id", (req, res) => {
-  const index = todos.findIndex((t) => t.id === Number(req.params.id));
-  if (index === -1) return res.status(404).json({ error: "Todo not found" });
-  const [deleted] = todos.splice(index, 1);
+  const id = Number(req.params.id);
+  const todo = todosMap.get(id);
+  if (!todo) return res.status(404).json({ error: "Todo not found" });
+  todosMap.delete(id);
   saveTodos();
-  res.json(deleted);
+  res.json(todo);
 });
 
 // 404 for unknown routes
