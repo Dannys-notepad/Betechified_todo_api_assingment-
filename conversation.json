@@ -1,0 +1,13 @@
+{
+  "version": 1,
+  "taskId": "5c4bc5a4",
+  "taskText": "Add an input validation check to the POST /todos endpoint that rejects titles longer than 200 characters. Return a 400 error with the message \"Title must be 200 characters or fewer\" when the limit is exceeded. Update the existing test in index.test.js to cover this case, then run the test suite and confirm it passes.",
+  "targetRepo": "Dannys-notepad/Betechified_todo_api_assingment-",
+  "baseBranch": "main",
+  "branchName": "omah/add-an-input-validation-check-to-the-pos-5c4bc5a4",
+  "steps": [],
+  "finished": true,
+  "startedAt": "2026-10-09T16:11:18.065Z",
+  "summary": "LLM call failed (status=410): HTTP 410: {\"type\":\"about:blank\",\"title\":\"Gone\",\"status\":410,\"detail\":\"The model 'deepseek-ai/deepseek-v4-pro' has reached its end of life on 2026-08-07T09:00:00Z and is no longer available.\"}\n",
+  "status": "blocked"
+}
