@@ -42,6 +42,15 @@ function loadTodos() {
   }
 }
 
+// Reset in-memory state (for testing)
+function resetTodos() {
+  todosMap.clear();
+  nextId = 1;
+  if (fs.existsSync(DATA_FILE)) {
+    fs.unlinkSync(DATA_FILE);
+  }
+}
+
 // Serialized, non-blocking asynchronous save
 let isWriting = false;
 let pendingWrite = false;
@@ -78,6 +87,14 @@ app.get("/todos", (req, res) => {
     return res.json(list.filter((t) => t.completed === completed));
   }
   res.json(list);
+});
+
+// GET todos stats
+app.get("/todos/stats", (req, res) => {
+  const list = Array.from(todosMap.values());
+  const total = list.length;
+  const completed = list.filter((t) => t.completed === true).length;
+  res.json({ total, completed });
 });
 
 // GET one todo
@@ -161,5 +178,8 @@ if (require.main === module) {
     console.log(`Todo API running on http://localhost:${PORT}`);
   });
 }
+
+// Attach resetTodos for testing
+app.resetTodos = resetTodos;
 
 module.exports = app;

@@ -11,8 +11,8 @@ describe("Todo API", () => {
     if (fs.existsSync(DATA_FILE)) {
       fs.unlinkSync(DATA_FILE);
     }
-    // Trigger re-load of empty file if needed by modifying index.js's state (done via importing/clearing or recreating state)
-    // Actually, since index.js loads once on import, we can just clear/reset the state directly if possible, or test standard API flow.
+    // Reset in-memory state
+    app.resetTodos();
   });
 
   afterAll(() => {
@@ -102,5 +102,29 @@ describe("Todo API", () => {
     // Invalid PUT - Not found
     res = await request(app).put("/todos/999").send({ title: "Updated" });
     expect(res.statusCode).toBe(404);
+  });
+
+  it("should return correct stats for todos", async () => {
+    // Create three todos
+    const res1 = await request(app).post("/todos").send({ title: "Todo 1" });
+    const res2 = await request(app).post("/todos").send({ title: "Todo 2" });
+    const res3 = await request(app).post("/todos").send({ title: "Todo 3" });
+
+    expect(res1.statusCode).toBe(201);
+    expect(res2.statusCode).toBe(201);
+    expect(res3.statusCode).toBe(201);
+
+    // Mark one as completed
+    const todoId = res2.body.id;
+    const updateRes = await request(app)
+      .put(`/todos/${todoId}`)
+      .send({ completed: true });
+    expect(updateRes.statusCode).toBe(200);
+    expect(updateRes.body.completed).toBe(true);
+
+    // Check stats
+    const statsRes = await request(app).get("/todos/stats");
+    expect(statsRes.statusCode).toBe(200);
+    expect(statsRes.body).toEqual({ total: 3, completed: 1 });
   });
 });
