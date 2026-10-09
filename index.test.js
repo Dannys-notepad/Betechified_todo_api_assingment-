@@ -89,7 +89,17 @@ describe("Todo API", () => {
     expect(res.statusCode).toBe(400);
     expect(res.body.error).toBe("Title must be 200 characters or fewer");
 
-    // Invalid PUT
+    // Create a valid todo to test PUT validation
+    res = await request(app).post("/todos").send({ title: "Valid Todo" });
+    expect(res.statusCode).toBe(201);
+    const todoId = res.body.id;
+
+    // Invalid PUT - Title too long (over 200 characters)
+    res = await request(app).put(`/todos/${todoId}`).send({ title: longTitle });
+    expect(res.statusCode).toBe(400);
+    expect(res.body.error).toBe("Title must be 200 characters or fewer");
+
+    // Invalid PUT - Not found
     res = await request(app).put("/todos/999").send({ title: "Updated" });
     expect(res.statusCode).toBe(404);
   });
