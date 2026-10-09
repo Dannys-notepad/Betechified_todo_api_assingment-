@@ -117,6 +117,9 @@ app.put("/todos/:id", (req, res) => {
     if (typeof title !== "string" || !title.trim()) {
       return res.status(400).json({ error: "Title must be a non-empty string" });
     }
+    if (title.length > 200) {
+      return res.status(400).json({ error: "Title must be 200 characters or fewer" });
+    }
     todo.title = title.trim();
   }
   if (completed !== undefined) {
