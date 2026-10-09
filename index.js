@@ -93,6 +93,9 @@ app.post("/todos", (req, res) => {
   if (!title || typeof title !== "string" || !title.trim()) {
     return res.status(400).json({ error: "Title is required" });
   }
+  if (title.length > 200) {
+    return res.status(400).json({ error: "Title must be 200 characters or fewer" });
+  }
   const todo = {
     id: nextId++,
     title: title.trim(),
