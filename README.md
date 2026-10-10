@@ -2,6 +2,8 @@
 
 A simple, lightweight RESTful Todo API built using Node.js and Express 5.
 
+poolside smoke test
+
 ## Features
 
 - In-memory storage (resets when the server restarts).
