@@ -144,3 +144,4 @@ All request and response bodies are formatted as JSON.
 ## License
 
 This project is licensed under the [ISC License](LICENSE).
+smoke test 1
