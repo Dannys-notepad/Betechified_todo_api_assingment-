@@ -1,0 +1,13 @@
+{
+  "version": 1,
+  "taskId": "89ea07f8",
+  "taskText": "Add a PATCH /todos/:id endpoint that updates only the completed field. Return 400 if completed is missing or not a boolean. Return 404 if the todo doesn't exist. Add a Jest test covering both the 400 and the 404 cases. Run the test suite and confirm it passes.",
+  "targetRepo": "Dannys-notepad/Betechified_todo_api_assingment-",
+  "baseBranch": "main",
+  "branchName": "omah/add-a-patch-todos-id-endpoint-that-updat-89ea07f8",
+  "steps": [],
+  "finished": true,
+  "startedAt": "2026-10-10T00:25:53.362Z",
+  "summary": "LLM call failed (status=400): HTTP 400: {\"error\":{\"message\":\"Failed to validate JSON. Please adjust your prompt. See 'failed_generation' for more details.\",\"type\":\"invalid_request_error\",\"code\":\"json_validate_failed\",\"failed_generation\":\"\"}}\n",
+  "status": "blocked"
+}
