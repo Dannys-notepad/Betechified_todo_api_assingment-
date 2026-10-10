@@ -37,7 +37,7 @@ To start the production server:
 npm start
 ```
 
-To start the development server with automatic reloading (utilizing Node's `--watch` flag):
+To start the development server with automatic reloads (utilizing Node's `--watch` flag):
 ```bash
 npm run dev
 ```
@@ -144,3 +144,5 @@ All request and response bodies are formatted as JSON.
 ## License
 
 This project is licensed under the [ISC License](LICENSE).
+
+poolside smoke test
