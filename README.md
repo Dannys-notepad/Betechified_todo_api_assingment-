@@ -141,6 +141,8 @@ All request and response bodies are formatted as JSON.
   ```
 - **Response (404 Not Found):** If the todo with the given ID does not exist.
 
+requesty smoke test
+
 ## License
 
 This project is licensed under the [ISC License](LICENSE).
